@@ -37,10 +37,10 @@ class ExampleTestCase(unittest2.TestCase):
         nodes = self.ep.nodes.filter(
             "'container' ! in facts.backends")
         for node in nodes:
-            self.ep.facts.create(node_id=node.id,
-                                 key='parent_id',
-                                 value=self.unprovisioned.id)
-            self.ep.facts.save()
+            new_fact = self.ep.facts.create(node_id=node.id,
+                                            key='parent_id',
+                                            value=self.unprovisioned.id)
+            new_fact.save()
 
         # sleep for 5 seconds to let the async operations process
         time.sleep(5)
