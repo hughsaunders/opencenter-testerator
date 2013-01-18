@@ -41,9 +41,17 @@ class ExampleTestCase(unittest2.TestCase):
                                             key='parent_id',
                                             value=self.unprovisioned.id)
             new_fact.save()
-            # sleep for 5 seconds to let the async operations process
-            time.sleep(2)
-            self.ep.nodes._refresh(True)
-            self.ep.facts._refresh(True)
-            self.assertEquals(node.facts['parent_id'],
+            self._poll_till_task_done(node)
+            self.assertEquals(self.ep.nodes[node.id].facts['parent_id'],
                               self.unprovisioned.id)
+
+    def _poll_till_task_done(self, node):
+        task_list = node.tasks.keys()
+        task = task_list.pop()
+        count = 0
+        while node.tasks[task].state != 'done':
+            if count >= 10:
+                break
+            else:
+                time.sleep(1)
+                count += 1
