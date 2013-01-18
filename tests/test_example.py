@@ -44,6 +44,6 @@ class ExampleTestCase(unittest2.TestCase):
             # sleep for 5 seconds to let the async operations process
             time.sleep(2)
             self.ep.nodes._refresh(True)
-            # self.ep.facts._refresh(True)
+            self.ep.facts._refresh(True)
             self.assertEquals(node.facts['parent_id'],
                               self.unprovisioned.id)
