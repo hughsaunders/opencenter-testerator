@@ -39,7 +39,7 @@ class ExampleTestCase(unittest2.TestCase):
         for node in nodes:
             self.ep.facts.create(node_id=node.id,
                                  key='parent_id',
-                                 value=self.unprovisioned.id})
+                                 value=self.unprovisioned.id)
             self.ep.facts.save()
 
         # sleep for 5 seconds to let the async operations process
