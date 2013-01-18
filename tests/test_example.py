@@ -41,10 +41,9 @@ class ExampleTestCase(unittest2.TestCase):
                                             key='parent_id',
                                             value=self.unprovisioned.id)
             new_fact.save()
-
-        # sleep for 5 seconds to let the async operations process
-        time.sleep(5)
-        self.ep.nodes._refresh(True)
-        self.ep.facts._refresh(True)
-        print self.ep.facts
-        pass
+            # sleep for 5 seconds to let the async operations process
+            time.sleep(2)
+            self.ep.nodes._refresh(True)
+            # self.ep.facts._refresh(True)
+            assertEquals(node.facts['parent_id'],
+                         self.unprovisioned.id)
