@@ -100,7 +100,7 @@ class ExampleTestCase(unittest2.TestCase):
 
     def _post_new_plan(self, raw_plan, node):
         new_plan = self._update_plan(raw_plan)
-        headers{'content-type': 'application/json'}
+        headers = {'content-type': 'application/json'}
         payload = {'node': node.id,
                    'plan': new_plan}
         # I know this works
