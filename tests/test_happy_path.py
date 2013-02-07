@@ -25,28 +25,27 @@ class ExampleTestCase(unittest2.TestCase):
                                            None)
         self.controller_name = os.environ.get('INSTANCE_CONTROLLER_HOSTNAME',
                                               None)
-        pass
+        self.ep = RoushEndpoint(self.endpoint_url)
+        self.admin_ep = RoushEndpoint(self.endpoint_url + '/admin')
 
     @classmethod
     def tearDownClass(self):
         pass
 
     def setUp(self):
-        self.ep = RoushEndpoint(self.endpoint_url)
-        self.admin_ep = RoushEndpoint(self.endpoint_url + '/admin')
-        self.workspace = ep.nodes.filter('name = "workspace"').first()
+        self.workspace = self.ep.nodes.filter('name = "workspace"').first()
         self.unprovisioned = self.ep.nodes.filter(
             "name = 'unprovisioned'").first()
         # Collect all the adventures we are going to run
-        self.chef_svr = ep.adventures.filter(
+        self.chef_svr = self.ep.adventures.filter(
             'name = "install chef server"').first()
-        self.chef_cli = ep.adventures.filter(
+        self.chef_cli = self.ep.adventures.filter(
             'name = "install chef client"').first()
-        self.nova_clus = ep.adventures.filter(
+        self.nova_clus = self.ep.adventures.filter(
             'name = "create nova cluster"').first()
-        self.n_api = ep.adventures.filter(
+        self.n_api = self.ep.adventures.filter(
             'name = "install nova controller"').first()
-        self.n_cpu = ep.adventures.filter(
+        self.n_cpu = self.ep.adventures.filter(
             'name = "install nova compute"').first()
         self.cluster_data = {
             'osops_public': '10.0.0.0/8', 'osops_mgmt': '10.0.0.0/8',
