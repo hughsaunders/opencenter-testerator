@@ -62,7 +62,7 @@ class ExampleTestCase(unittest2.TestCase):
         # Run the install-chef-server adventure on the node
         server = self.ep.nodes.filter(
             "name = '%s'" % self.server_name).first()
-        resp = self.ep.adventure[3].execute(node=server.id)
+        resp = self.ep.adventures[3].execute(node=server.id)
         if resp.status_code != 202:
             self.assertTrue(False)
 
@@ -130,6 +130,7 @@ class ExampleTestCase(unittest2.TestCase):
             self.assertIsNotNone(node.facts.get(key, None))
 
     def _poll_till_task_done(self, node, wait_time=10):
+        os.sleep(5)
         task_list = node.tasks.keys()
         task = task_list.pop()
         count = 0
