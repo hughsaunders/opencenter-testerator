@@ -1,9 +1,10 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
+import json
 import os
+import requests
 import time
 import unittest2
-import requests
 
 from roushclient.client import RoushEndpoint
 
@@ -15,6 +16,13 @@ class ExampleTestCase(unittest2.TestCase):
     """
     @classmethod
     def setUpClass(self):
+	pass
+
+    @classmethod
+    def tearDownClass(self):
+        pass
+
+    def setUp(self):
         self.endpoint_url = os.environ.get('ROUSH_ENDPOINT',
                                            'http://127.0.0.0:8080')
         self.server_name = os.environ.get('INSTANCE_SERVER_HOSTNAME',
@@ -25,14 +33,12 @@ class ExampleTestCase(unittest2.TestCase):
                                            None)
         self.controller_name = os.environ.get('INSTANCE_CONTROLLER_HOSTNAME',
                                               None)
+	print "ENDPOINT_URL: %s" % self.endpoint_url
+	print "SERVER_HOSTNAME: %s" % self.server_name
+	print "COMPUTE_HOSTNAME: %s" % self.compute_name
+	print "CONTROLLER_HOSTNAME: %s" % self.controller_name
         self.ep = RoushEndpoint(self.endpoint_url)
         self.admin_ep = RoushEndpoint(self.endpoint_url + '/admin')
-
-    @classmethod
-    def tearDownClass(self):
-        pass
-
-    def setUp(self):
         self.workspace = self.ep.nodes.filter('name = "workspace"').first()
         self.unprovisioned = self.ep.nodes.filter(
             "name = 'unprovisioned'").first()
@@ -63,54 +69,87 @@ class ExampleTestCase(unittest2.TestCase):
         server = self.ep.nodes.filter(
             "name = '%s'" % self.server_name).first()
         resp = self.ep.adventures[3].execute(node=server.id)
-        if resp.status_code != 202:
-            self.assertTrue(False)
+	self.assertEquals(resp.status_code, 202)
 
         # adventure is running, go poll
-        self._poll_till_task_done(server, wait_time=900)
+	task = resp.task
+	task.wait_for_complete()
+        # self._poll_till_task_done(server, wait_time=900)
 
         # refresh the server object
         server._request('get')
-        _validate_chef_server(server)
+        self._validate_chef_server(server)
 
         # Lets check if the root workspace now has the correct adventure
-        assertTrue(self.nova_clus.id in self.workspace.adventures.keys())
+        self.assertTrue(self.nova_clus.id in self.workspace.adventures.keys())
         # This will fail, as it needs input
-        plan = self.ep.adventures[self.nova_clus.id].execute(
-            node=workspace.id, **info)
-        assertEquals(plan.status_code, 409)
-        assertTrue(plan.requires_input)
+        #plan = self.ep.adventures[self.nova_clus.id].execute(
+        #    node=self.workspace.id, **self.cluster_data)
+        #self.assertEquals(plan.status_code, 409)
+        #self.assertTrue(plan.requires_input)
 
-        # Lets post back the new plan
-        resp = self._post_new_plan(plan.execution_plan.raw_plan, workspace)
-        assertEquals(resp.status_code, 202)
+	# Trying new and improved adventure.execute()
+	# new_plan = self._update_plan(plan.execution_plan.raw_plan)
+	resp = self.ep.adventures[self.nova_clus.id].execute(
+	    node=self.workspace.id, plan_args=self.cluster_data)
+        self.assertEquals(resp.status_code, 202)
+        self.assertFalse(resp.requires_input)
+	task = resp.task
+	task.wait_for_complete()
+
+        # # Lets post back the new plan
+        # resp = self._post_new_plan(plan.execution_plan.raw_plan, self.workspace)
+        # self.assertEquals(resp.status_code, 202)
+	# task = resp.task
+	# task.wait_for_complete()
+        # # self._poll_till_task_done(self.workspace, wait_time=6)
 
         # make sure test_cluster got created
-        test_cluster = ep.nodes.filter(
+        test_cluster = self.ep.nodes.filter(
             'name = "%s"' % self.cluster_data['cluster_name']).first()
         self.assertIsNotNone(test_cluster)
         self.assertEquals(test_cluster.facts['parent_id'], self.workspace.id)
-        infra = ep.nodes.filter('name = "Infrastructure"').first()
-        self.assertIsNotNone(infra)
-        self.assertEquals(infra.facts['parent_id'], test_cluster.id)
-        compute = ep.nodes.filter('name = "Compute"').first()
-        self.assertIsNotNone(infra)
-        self.assertEquals(compute.facts['parent_id'], test_cluster.id)
+        infra_container = self.ep.nodes.filter('name = "Infrastructure"').first()
+        self.assertIsNotNone(infra_container)
+        self.assertEquals(infra_container.facts['parent_id'], test_cluster.id)
+        compute_container = self.ep.nodes.filter('name = "Compute"').first()
+        self.assertIsNotNone(compute_container)
+        self.assertEquals(compute_container.facts['parent_id'], test_cluster.id)
+
+	# Reparent self.controller_name under the new infra container
+	new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
+	self._reparent(new_controller, infra_container)
+ 	new_controller._request('get')
+	self.assertEquals(new_controller.facts['parent_id'], infra_container.id)	
+
+	# Reparent self.controller_name under the new infra container
+	new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
+	self._reparent(new_compute, compute_container)
+ 	new_compute._request('get')
+	self.assertEquals(new_compute.facts['parent_id'], compute_container.id)	
+
+    def _reparent(self, child_node, parent_node):
+	new_fact = self.ep.facts.create(node_id=child_node.id, key='parent_id', value=parent_node.id)
+	resp = new_fact.save()
+	self.assertEquals(resp.status_code, 202)
+	task = resp.task
+	task.wait_for_complete()
+	
 
     def _post_new_plan(self, raw_plan, node):
         new_plan = self._update_plan(raw_plan)
+	print "******** PLAN: %s" % new_plan
         headers = {'content-type': 'application/json'}
         payload = {'node': node.id,
                    'plan': new_plan}
         # I know this works
         #resp = requests.post(self.ep.endpoint + '/plan/',
-        #                     payload=json.dumps(payload),
+        #                     data=json.dumps(payload),
         #                     headers=headers)
-        #assertEquals(resp.status_code, 202)
         # I want this to work
-        resp = ep.requests.post(self.ep.endpoint + '/plan/',
-                                payload=json.dumps(payload),
-                                headers=headers)
+        resp = self.ep.requests.post(self.ep.endpoint + '/plan/',
+                                     data=json.dumps(payload),
+                                     headers=headers)
         return resp
 
     def _update_plan(self, plan):
@@ -124,9 +163,9 @@ class ExampleTestCase(unittest2.TestCase):
     def _validate_chef_server(self, node):
         self.assertTrue('chef-server' in node.facts['backends'])
         fact_keys = ['chef_server_client_name', 'chef_server_client_pem',
-                     'chef_server_pem', 'chef_server_uri',
-                     'chef_webui_password']
+                     'chef_server_pem', 'chef_server_uri']
         for key in fact_keys:
+	    print "**** %s: %s" % (key, node.facts.get(key, None))
             self.assertIsNotNone(node.facts.get(key, None))
 
     def _poll_till_task_done(self, node, wait_time=10):
@@ -138,5 +177,5 @@ class ExampleTestCase(unittest2.TestCase):
             if count >= wait_time:
                 break
             else:
-                time.sleep(1)
+                time.sleep(5)
                 count += 1
