@@ -16,7 +16,7 @@ class ExampleTestCase(unittest2.TestCase):
     """
     @classmethod
     def setUpClass(self):
-	pass
+        pass
 
     @classmethod
     def tearDownClass(self):
@@ -33,10 +33,10 @@ class ExampleTestCase(unittest2.TestCase):
                                            None)
         self.controller_name = os.environ.get('INSTANCE_CONTROLLER_HOSTNAME',
                                               None)
-	print "ENDPOINT_URL: %s" % self.endpoint_url
-	print "SERVER_HOSTNAME: %s" % self.server_name
-	print "COMPUTE_HOSTNAME: %s" % self.compute_name
-	print "CONTROLLER_HOSTNAME: %s" % self.controller_name
+        print "ENDPOINT_URL: %s" % self.endpoint_url
+        print "SERVER_HOSTNAME: %s" % self.server_name
+        print "COMPUTE_HOSTNAME: %s" % self.compute_name
+        print "CONTROLLER_HOSTNAME: %s" % self.controller_name
         self.ep = RoushEndpoint(self.endpoint_url)
         self.admin_ep = RoushEndpoint(self.endpoint_url + '/admin')
         self.workspace = self.ep.nodes.filter('name = "workspace"').first()
@@ -53,6 +53,8 @@ class ExampleTestCase(unittest2.TestCase):
             'name = "install nova controller"').first()
         self.n_cpu = self.ep.adventures.filter(
             'name = "install nova compute"').first()
+        self.download_cookbooks = self.ep.adventures.filter(
+            'name = "download chef cookbooks"').first()
         self.cluster_data = {
             'osops_public': '10.0.0.0/8', 'osops_mgmt': '10.0.0.0/8',
             'osops_nova': '10.0.0.0/8', 'nova_public_if': 'eth1',
@@ -69,16 +71,23 @@ class ExampleTestCase(unittest2.TestCase):
         server = self.ep.nodes.filter(
             "name = '%s'" % self.server_name).first()
         resp = self.ep.adventures[3].execute(node=server.id)
-	self.assertEquals(resp.status_code, 202)
+        self.assertEquals(resp.status_code, 202)
 
         # adventure is running, go poll
-	task = resp.task
-	task.wait_for_complete()
+        task = resp.task
+        task.wait_for_complete()
         # self._poll_till_task_done(server, wait_time=900)
 
         # refresh the server object
         server._request('get')
         self._validate_chef_server(server)
+
+        # run the 'download chef cookbooks' adventure
+        resp = self.ep.adventures[self.download_cookbooks.id].execute(node=server.id)
+        self.assertEquals(resp.status_code, 202)
+        task = resp.task
+        task.wait_for_complete()
+        # TODO(shep): probably need to assert against facts/attrs here
 
         # Lets check if the root workspace now has the correct adventure
         self.assertTrue(self.nova_clus.id in self.workspace.adventures.keys())
@@ -88,14 +97,14 @@ class ExampleTestCase(unittest2.TestCase):
         #self.assertEquals(plan.status_code, 409)
         #self.assertTrue(plan.requires_input)
 
-	# Trying new and improved adventure.execute()
-	# new_plan = self._update_plan(plan.execution_plan.raw_plan)
-	resp = self.ep.adventures[self.nova_clus.id].execute(
-	    node=self.workspace.id, plan_args=self.cluster_data)
+        # Trying new and improved adventure.execute()
+        # new_plan = self._update_plan(plan.execution_plan.raw_plan)
+        resp = self.ep.adventures[self.nova_clus.id].execute(
+            node=self.workspace.id, plan_args=self.cluster_data)
         self.assertEquals(resp.status_code, 202)
         self.assertFalse(resp.requires_input)
-	task = resp.task
-	task.wait_for_complete()
+        task = resp.task
+        task.wait_for_complete()
 
         # # Lets post back the new plan
         # resp = self._post_new_plan(plan.execution_plan.raw_plan, self.workspace)
@@ -117,28 +126,27 @@ class ExampleTestCase(unittest2.TestCase):
         self.assertEquals(compute_container.facts['parent_id'], test_cluster.id)
 
 	# Reparent self.controller_name under the new infra container
-	new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
-	self._reparent(new_controller, infra_container)
+        new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
+        self._reparent(new_controller, infra_container)
  	new_controller._request('get')
-	self.assertEquals(new_controller.facts['parent_id'], infra_container.id)	
+        self.assertEquals(new_controller.facts['parent_id'], infra_container.id)	
 
 	# Reparent self.controller_name under the new infra container
-	new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
-	self._reparent(new_compute, compute_container)
- 	new_compute._request('get')
-	self.assertEquals(new_compute.facts['parent_id'], compute_container.id)	
+        new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
+        self._reparent(new_compute, compute_container)
+        new_compute._request('get')
+        self.assertEquals(new_compute.facts['parent_id'], compute_container.id)	
 
     def _reparent(self, child_node, parent_node):
-	new_fact = self.ep.facts.create(node_id=child_node.id, key='parent_id', value=parent_node.id)
-	resp = new_fact.save()
-	self.assertEquals(resp.status_code, 202)
-	task = resp.task
-	task.wait_for_complete()
+        new_fact = self.ep.facts.create(node_id=child_node.id, key='parent_id', value=parent_node.id)
+        resp = new_fact.save()
+        self.assertEquals(resp.status_code, 202)
+        task = resp.task
+        task.wait_for_complete()
 	
 
     def _post_new_plan(self, raw_plan, node):
         new_plan = self._update_plan(raw_plan)
-	print "******** PLAN: %s" % new_plan
         headers = {'content-type': 'application/json'}
         payload = {'node': node.id,
                    'plan': new_plan}
@@ -165,7 +173,6 @@ class ExampleTestCase(unittest2.TestCase):
         fact_keys = ['chef_server_client_name', 'chef_server_client_pem',
                      'chef_server_pem', 'chef_server_uri']
         for key in fact_keys:
-	    print "**** %s: %s" % (key, node.facts.get(key, None))
             self.assertIsNotNone(node.facts.get(key, None))
 
     def _poll_till_task_done(self, node, wait_time=10):
