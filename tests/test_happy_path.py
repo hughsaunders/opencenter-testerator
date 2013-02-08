@@ -130,7 +130,7 @@ class ExampleTestCase(unittest2.TestCase):
             self.assertIsNotNone(node.facts.get(key, None))
 
     def _poll_till_task_done(self, node, wait_time=10):
-        os.sleep(5)
+        time.sleep(5)
         task_list = node.tasks.keys()
         task = task_list.pop()
         count = 0
