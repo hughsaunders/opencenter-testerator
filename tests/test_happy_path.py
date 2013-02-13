@@ -125,8 +125,18 @@ class ExampleTestCase(unittest2.TestCase):
         self.assertIsNotNone(compute_container)
         self.assertEquals(compute_container.facts['parent_id'], test_cluster.id)
 
-	# Reparent self.controller_name under the new infra container
+        # Install chef-client
         new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
+        new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
+        for srv in [new_controller, new_compute]:
+            resp = self.ep.adventures[self.chef_cli.id].execute(
+                node=srv.id)
+            self.assertEquals(resp.status_code, 202)
+            self.assertFalse(resp.requires_input)
+            task = resp.task
+            task.wait_for_complete()
+
+	# Reparent self.controller_name under the new infra container
         self._reparent(new_controller, infra_container)
  	new_controller._request('get')
         self.assertEquals(new_controller.facts['parent_id'], infra_container.id)
