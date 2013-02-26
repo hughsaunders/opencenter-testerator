@@ -23,7 +23,7 @@ class ExampleTestCase(unittest2.TestCase):
         pass
 
     def setUp(self):
-        self.endpoint_url = os.environ.get('ROUSH_ENDPOINT',
+        self.endpoint_url = os.environ.get('OPENCENTER_ENDPOINT',
                                            'http://127.0.0.0:8080')
         self.server_name = os.environ.get('INSTANCE_SERVER_HOSTNAME',
                                           None)
