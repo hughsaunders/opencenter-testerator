@@ -6,7 +6,7 @@ import requests
 import time
 import unittest2
 
-from roushclient.client import RoushEndpoint
+from opencenter.client import OpenCenterEndpoint
 
 
 class ExampleTestCase(unittest2.TestCase):
@@ -37,8 +37,8 @@ class ExampleTestCase(unittest2.TestCase):
         print "SERVER_HOSTNAME: %s" % self.server_name
         print "COMPUTE_HOSTNAME: %s" % self.compute_name
         print "CONTROLLER_HOSTNAME: %s" % self.controller_name
-        self.ep = RoushEndpoint(self.endpoint_url)
-        self.admin_ep = RoushEndpoint(self.endpoint_url + '/admin')
+        self.ep = OpenCenterEndpoint(self.endpoint_url)
+        self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin')
         self.workspace = self.ep.nodes.filter('name = "workspace"').first()
         self.unprovisioned = self.ep.nodes.filter(
             "name = 'unprovisioned'").first()
