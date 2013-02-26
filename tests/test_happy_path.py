@@ -6,7 +6,7 @@ import requests
 import time
 import unittest2
 
-from opencenter.client import OpenCenterEndpoint
+from opencenterclient.client import OpenCenterEndpoint
 
 
 class ExampleTestCase(unittest2.TestCase):
