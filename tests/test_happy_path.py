@@ -44,17 +44,17 @@ class ExampleTestCase(unittest2.TestCase):
             "name = 'unprovisioned'").first()
         # Collect all the adventures we are going to run
         self.chef_svr = self.ep.adventures.filter(
-            'name = "install chef server"').first()
+            'name = "Install Chef Server"').first()
         self.chef_cli = self.ep.adventures.filter(
-            'name = "install chef client"').first()
+            'name = "Install Chef Client"').first()
         self.nova_clus = self.ep.adventures.filter(
-            'name = "create nova cluster"').first()
+            'name = "Create Nova Cluster"').first()
         self.n_api = self.ep.adventures.filter(
-            'name = "install nova controller"').first()
+            'name = "Install Nova Controller"').first()
         self.n_cpu = self.ep.adventures.filter(
-            'name = "install nova compute"').first()
+            'name = "Install Nova Compute"').first()
         self.download_cookbooks = self.ep.adventures.filter(
-            'name = "download chef cookbooks"').first()
+            'name = "Download Chef Cookbooks"').first()
         self.cluster_data = {
             'osops_public': '10.0.0.0/8', 'osops_mgmt': '10.0.0.0/8',
             'osops_nova': '10.0.0.0/8', 'nova_public_if': 'eth1',
@@ -68,9 +68,8 @@ class ExampleTestCase(unittest2.TestCase):
 
     def test_roush_happy_path(self):
         # Run the install-chef-server adventure on the node
-        server = self.ep.nodes.filter(
-            "name = '%s'" % self.server_name).first()
-        resp = self.ep.adventures[3].execute(node=server.id)
+        chef_server = self.ep.nodes.filter("name = '%s'" % self.chef_name).first()
+        resp = self.ep.adventures[self.chef_svr.id].execute(node=chef_server.id)
         self.assertEquals(resp.status_code, 202)
 
         # adventure is running, go poll
@@ -79,11 +78,11 @@ class ExampleTestCase(unittest2.TestCase):
         # self._poll_till_task_done(server, wait_time=900)
 
         # refresh the server object
-        server._request('get')
-        self._validate_chef_server(server)
+        chef_server._request('get')
+        self._validate_chef_server(chef_server)
 
         # run the 'download chef cookbooks' adventure
-        resp = self.ep.adventures[self.download_cookbooks.id].execute(node=server.id)
+        resp = self.ep.adventures[self.download_cookbooks.id].execute(node=chef_server.id)
         self.assertEquals(resp.status_code, 202)
         task = resp.task
         task.wait_for_complete()
@@ -138,7 +137,7 @@ class ExampleTestCase(unittest2.TestCase):
 
 	# Reparent self.controller_name under the new infra container
         self._reparent(new_controller, infra_container)
- 	new_controller._request('get')
+        new_controller._request('get')
         self.assertEquals(new_controller.facts['parent_id'], infra_container.id)
 
 	# Reparent self.controller_name under the new infra container
