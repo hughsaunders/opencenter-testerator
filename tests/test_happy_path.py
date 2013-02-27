@@ -88,14 +88,10 @@ class ExampleTestCase(unittest2.TestCase):
         task.wait_for_complete()
         # TODO(shep): probably need to assert against facts/attrs here
 
+        
         # Lets check if the root workspace now has the correct adventure
         self.assertTrue(self.nova_clus.id in self.workspace.adventures.keys())
-        # This will fail, as it needs input
-        #plan = self.ep.adventures[self.nova_clus.id].execute(
-        #    node=self.workspace.id, **self.cluster_data)
-        #self.assertEquals(plan.status_code, 409)
-        #self.assertTrue(plan.requires_input)
-
+        
         # Trying new and improved adventure.execute()
         # new_plan = self._update_plan(plan.execution_plan.raw_plan)
         resp = self.ep.adventures[self.nova_clus.id].execute(
@@ -151,6 +147,7 @@ class ExampleTestCase(unittest2.TestCase):
         resp = new_fact.save()
         self.assertEquals(resp.status_code, 202)
         task = resp.task
+        print "Task: %s" % task
         task.wait_for_complete()
 
 
