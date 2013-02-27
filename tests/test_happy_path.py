@@ -119,7 +119,10 @@ class ExampleTestCase(unittest2.TestCase):
         compute_container = self.ep.nodes.filter('name = "Compute"').first()
         self.assertIsNotNone(compute_container)
         self.assertEquals(compute_container.facts['parent_id'], test_cluster.id)
-
+        az_container = self.ep.nodes.filter('name = "AZ %s"' % self.cluster_data['nova_az']).first()
+        self.assertIsNotNone(az_container)
+        self.assertEquals(az_container.facts['parent_id'], compute_container.id)
+        
         # Install chef-client
         new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
         new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
@@ -138,20 +141,25 @@ class ExampleTestCase(unittest2.TestCase):
 
 	# Reparent self.controller_name under the new infra container
         new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
-        self._reparent(new_compute, compute_container)
+        self._reparent(new_compute, az_container)
         new_compute._request('get')
-        self.assertEquals(new_compute.facts['parent_id'], compute_container.id)
+        self.assertEquals(new_compute.facts['parent_id'], az_container.id)
 
     def _reparent(self, child_node, parent_node):
         new_fact = self.ep.facts.create(node_id=child_node.id, key='parent_id', value=parent_node.id)
         resp = new_fact.save()
         self.assertEquals(resp.status_code, 202)
         task = resp.task
-        print "Task: %s" % task
         task.wait_for_complete()
-        for task in self.ep.nodes[child_node.id].tasks:
+        #Wait for the chain of adventures that follow to finish 
+        tasks = self.ep.nodes[child_node.id].tasks
+        for task in tasks:
             task.wait_for_complete()
-
+            time.sleep(2)
+            #Reload tasks after a finished run to check newly added tasks
+            tasks = self.ep.nodes[child_node.id].tasks
+            
+            
     def _post_new_plan(self, raw_plan, node):
         new_plan = self._update_plan(raw_plan)
         headers = {'content-type': 'application/json'}
