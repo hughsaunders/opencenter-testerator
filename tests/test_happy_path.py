@@ -131,7 +131,6 @@ class ExampleTestCase(unittest2.TestCase):
             task = resp.task
             task.wait_for_complete()
         
-        return
 	# Reparent self.controller_name under the new infra container
         self._reparent(new_controller, infra_container)
         new_controller._request('get')
@@ -150,6 +149,8 @@ class ExampleTestCase(unittest2.TestCase):
         task = resp.task
         print "Task: %s" % task
         task.wait_for_complete()
+        for task in self.ep.nodes[child_node.id].tasks:
+            task.wait_for_complete()
 
     def _post_new_plan(self, raw_plan, node):
         new_plan = self._update_plan(raw_plan)
