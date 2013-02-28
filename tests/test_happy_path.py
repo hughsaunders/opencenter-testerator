@@ -151,12 +151,12 @@ class ExampleTestCase(unittest2.TestCase):
         self.assertEquals(resp.status_code, 202)
         task = resp.task
         task.wait_for_complete()
-        time.sleep(10)
+        time.sleep(15)
         #Wait for the chain of adventures that follow to finish 
         tasks = self.ep.nodes[child_node.id].tasks
         for task in tasks:
             task.wait_for_complete()
-            time.sleep(5)
+            time.sleep(8)
             #Reload tasks after a finished run to check newly added tasks
             tasks = self.ep.nodes[child_node.id].tasks
             
