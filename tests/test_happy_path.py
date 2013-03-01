@@ -61,7 +61,7 @@ class ExampleTestCase(unittest2.TestCase):
             'nova_vm_bridge': 'br100', 'nova_dmz_cidr': '172.16.0.0/12',
             'cluster_name': 'test_cluster',
             'keystone_admin_pw': 'secrete', 'nova_vm_fixed_if': 'eth1',
-            'nova_az': 'az1', 'nova_vm_fixed_range': '192.168.200.0/24'}
+            'nova_vm_fixed_range': '192.168.200.0/24'}
 
     def tearDown(self):
         pass
@@ -119,7 +119,7 @@ class ExampleTestCase(unittest2.TestCase):
         compute_container = self.ep.nodes.filter('name = "Compute"').first()
         self.assertIsNotNone(compute_container)
         self.assertEquals(compute_container.facts['parent_id'], test_cluster.id)
-        az_container = self.ep.nodes.filter('name = "AZ %s"' % self.cluster_data['nova_az']).first()
+        az_container = self.ep.nodes.filter('name = "AZ nova"').first()
         self.assertIsNotNone(az_container)
         self.assertEquals(az_container.facts['parent_id'], compute_container.id)
         
