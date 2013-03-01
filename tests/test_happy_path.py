@@ -9,10 +9,10 @@ import unittest2
 from opencenterclient.client import OpenCenterEndpoint
 
 
-class ExampleTestCase(unittest2.TestCase):
+class OpenCenterTestCase(unittest2.TestCase):
     """
-    This test case assumes a roush-server has been successfully created, and
-    at least 3 nodes have roush-agent installed.
+    This test case assumes a opencenter-server has been successfully created, and
+    at least 3 nodes have opencenter-agent installed.
     """
     @classmethod
     def setUpClass(self):
@@ -66,7 +66,7 @@ class ExampleTestCase(unittest2.TestCase):
     def tearDown(self):
         pass
 
-    def test_roush_happy_path(self):
+    def test_opencenter_happy_path(self):
         # Run the install-chef-server adventure on the node
         chef_server = self.ep.nodes.filter("name = '%s'" % self.chef_name).first()
         resp = self.ep.adventures[self.chef_svr.id].execute(node=chef_server.id)
@@ -151,14 +151,13 @@ class ExampleTestCase(unittest2.TestCase):
         self.assertEquals(resp.status_code, 202)
         task = resp.task
         task.wait_for_complete()
-        time.sleep(15)
+        time.sleep(10)
         #Wait for the chain of adventures that follow to finish 
         tasks = self.ep.nodes[child_node.id].tasks
         for task in tasks:
             task.wait_for_complete()
-            time.sleep(8)
-            #Reload tasks after a finished run to check newly added tasks
-            tasks = self.ep.nodes[child_node.id].tasks
+            if (tasks != self.ep.nodes[child_node.id].tasks):
+                tasks = self.ep.nodes[child_node.id].tasks
             
             
     def _post_new_plan(self, raw_plan, node):

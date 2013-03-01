@@ -1,4 +1,13 @@
-roush-testerator
+opencenter-testerator
 ================
 
-Functional Test Suite for Roush
+Functional Test Suite for OpenCenter
+
+
+
+Requirements
+==============
+
+opencenterclient
+
+
