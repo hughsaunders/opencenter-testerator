@@ -24,7 +24,7 @@ class OpenCenterTestCase(unittest2.TestCase):
 
     def setUp(self):
         self.endpoint_url = os.environ.get('OPENCENTER_ENDPOINT',
-                                           'http://127.0.0.0:8080')
+                                           'https://127.0.0.0:8443')
         self.server_name = os.environ.get('INSTANCE_SERVER_HOSTNAME',
                                           None)
         self.chef_name = os.environ.get('INSTANCE_CHEF_HOSTNAME',
