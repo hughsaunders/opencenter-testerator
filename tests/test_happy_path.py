@@ -33,12 +33,17 @@ class OpenCenterTestCase(unittest2.TestCase):
                                            None)
         self.controller_name = os.environ.get('INSTANCE_CONTROLLER_HOSTNAME',
                                               None)
+        self.user = os.environ.get('OPENCENTER_USER',
+                                              "admin")
+        self.password = os.environ.get('OPENCENTER_PASSWORD',
+                                              None)
+        
         print "ENDPOINT_URL: %s" % self.endpoint_url
         print "SERVER_HOSTNAME: %s" % self.server_name
         print "COMPUTE_HOSTNAME: %s" % self.compute_name
         print "CONTROLLER_HOSTNAME: %s" % self.controller_name
-        self.ep = OpenCenterEndpoint(self.endpoint_url)
-        self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin')
+        self.ep = OpenCenterEndpoint(self.endpoint_url, user=self.user, password=self.password)
+        self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin', user=self.user, password=self.password)
         self.workspace = self.ep.nodes.filter('name = "workspace"').first()
         self.unprovisioned = self.ep.nodes.filter(
             "name = 'unprovisioned'").first()
