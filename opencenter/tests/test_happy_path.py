@@ -6,6 +6,7 @@ import requests
 import time
 import unittest2
 
+from opencenter.config import OpenCenterConfig
 from opencenterclient.client import OpenCenterEndpoint
 
 
@@ -23,27 +24,28 @@ class OpenCenterTestCase(unittest2.TestCase):
         pass
 
     def setUp(self):
-        self.endpoint_url = os.environ.get('OPENCENTER_ENDPOINT','http://127.0.0.0:8080')
-        self.server_name = os.environ.get('INSTANCE_SERVER_HOSTNAME',None)
-        self.chef_name = os.environ.get('INSTANCE_CHEF_HOSTNAME',None)
-        self.compute_name = os.environ.get('INSTANCE_COMPUTE_HOSTNAME',None)
-        self.controller_name = os.environ.get('INSTANCE_CONTROLLER_HOSTNAME',None)
-        self.user = os.environ.get('OPENCENTER_USER',"admin")
-        self.password = os.environ.get('OPENCENTER_PASSWORD',None)
         
+        config = OpenCenterConfig()
+        self.endpoint_url = opencenter_config.endpoint_url
+        self.server_name = opencenter_config.server_name
+        self.chef_name = opencenter_config.instance_chef_hostname
+        self.compute_name = opencenter_config.instance_compute_hostname
+        self.controller_name = opencenter_config.instance_controller_hostname
+        self.user = opencenter_config.user
+        self.password = opencenter_config.password
+             
         self.cluster_data = {
-            'osops_public': '10.0.0.0/8', 'osops_mgmt': '10.0.0.0/8',
-            'osops_nova': '10.0.0.0/8', 'nova_public_if': 'eth1',
-            'nova_vm_bridge': 'br100', 'nova_dmz_cidr': '172.16.0.0/12',
-            'cluster_name': 'test_cluster',
-            'keystone_admin_pw': 'secrete', 'nova_vm_fixed_if': 'eth1',
-            'nova_vm_fixed_range': '192.168.200.0/24'}
-         
-        print "ENDPOINT_URL: %s" % self.endpoint_url
-        print "SERVER_HOSTNAME: %s" % self.server_name
-        print "COMPUTE_HOSTNAME: %s" % self.compute_name
-        print "CONTROLLER_HOSTNAME: %s" % self.controller_name
-        
+            'osops_public': cluster_data.osops_public,
+            'osops_mgmt': cluster_data.osops_mgmt,
+            'osops_nova': cluster_data.osops_nova, 
+            'nova_public_if': cluster_data.nova_public_if,
+            'nova_vm_bridge': cluster_data.nova_vm_bridge, 
+            'nova_dmz_cidr': cluster_data.nova_dmz_cidr,
+            'cluster_name': cluster_data.cluster_name,
+            'keystone_admin_pw': cluster_data.keystone_admin_pw,
+            'nova_vm_fixed_if': cluster_data.nova_vm_fixed_if,
+            'nova_vm_fixed_range': cluster_data.nova_vm_fixed_range
+        }
         
         self.ep = OpenCenterEndpoint(self.endpoint_url, user=self.user, password=self.password)
         self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin', user=self.user, password=self.password)
