@@ -62,7 +62,7 @@ class OpenCenterConfig(BaseConfig):
         return self.get("instance_compute_hostname", 'opencenter-agent2')
         
     @property
-    def user_name(self):
+    def user(self):
         return self.get("user", None)
     
     @property
