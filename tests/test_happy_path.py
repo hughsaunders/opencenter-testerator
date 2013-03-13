@@ -30,6 +30,20 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.controller_name = os.environ.get('INSTANCE_CONTROLLER_HOSTNAME',None)
         self.user = os.environ.get('OPENCENTER_USER',"admin")
         self.password = os.environ.get('OPENCENTER_PASSWORD',None)
+        self.endpoint_url = os.environ.get('OPENCENTER_ENDPOINT',
+                                           'https://127.0.0.0:8443')
+        self.server_name = os.environ.get('INSTANCE_SERVER_HOSTNAME',
+                                          None)
+        self.chef_name = os.environ.get('INSTANCE_CHEF_HOSTNAME',
+                                        None)
+        self.compute_name = os.environ.get('INSTANCE_COMPUTE_HOSTNAME',
+                                           None)
+        self.controller_name = os.environ.get('INSTANCE_CONTROLLER_HOSTNAME',
+                                              None)
+        self.user = os.environ.get('OPENCENTER_USER',
+                                              "admin")
+        self.password = os.environ.get('OPENCENTER_PASSWORD',
+                                              None)
         
         self.cluster_data = {
             'osops_public': '10.0.0.0/8', 'osops_mgmt': '10.0.0.0/8',
