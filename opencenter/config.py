@@ -68,7 +68,8 @@ class OpenCenterConfig(BaseConfig):
         return self.get("password", None)
     
     
-    
+   
+        
     
     
     
@@ -77,6 +78,10 @@ class OpenCenterConfig(BaseConfig):
 class ClusterDataConfig(BaseConfig):
     SECTION_NAME = "cluster_data"
 
+    @property
+    def libvirt_type(self):
+        return self.get("libvirt_type", "kvm")
+    
     @property
     def osops_public(self):
         return self.get("osops_public", '10.0.0.0/8')

@@ -47,7 +47,8 @@ class OpenCenterTestCase(unittest2.TestCase):
             'cluster_name': cluster_data.cluster_name,
             'keystone_admin_pw': cluster_data.keystone_admin_pw,
             'nova_vm_fixed_if': cluster_data.nova_vm_fixed_if,
-            'nova_vm_fixed_range': cluster_data.nova_vm_fixed_range
+            'nova_vm_fixed_range': cluster_data.nova_vm_fixed_range,
+            'libvirt_type': cluster_data.libvirt_type
         }
         
         if self.user:
