@@ -19,8 +19,6 @@ import ConfigParser
 import logging
 import os
 
-LOG = logging.getLogger(__name__)
-
 
 class BaseConfig(object):
 
@@ -158,10 +156,13 @@ class OpenCenterConfiguration:
     def __init__(self):
         """Initialize a configuration from a conf directory and conf file."""
         # Environment variables override defaults...
+
+        self.log.setLevel(getattr(logging, "INFO"))
+                
         conf_dir = os.environ.get('OPENCENTER_CONFIG_DIR',self.DEFAULT_CONFIG_DIR)
         conf_file = os.environ.get('OPENCENTER_CONFIG', self.DEFAULT_CONFIG_FILE)
         path = os.path.join(conf_dir, conf_file)
-        LOG.info("Using opencenter config file %s" % path)
+        self.log.info("Using opencenter config file %s" % path)
         if not os.path.exists(path):
             msg = "**** Config file %(path)s NOT FOUND ****" % locals()
             raise RuntimeError(msg)
@@ -170,7 +171,6 @@ class OpenCenterConfiguration:
         self.opencenter_config = OpenCenterConfig(self.conf)
         self.cluster_data = ClusterDataConfig(self.conf)
         
-
 
     def load_config(self, path):
         """Read configuration from given path and return a config object."""
