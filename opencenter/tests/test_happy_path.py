@@ -6,7 +6,7 @@ import requests
 import time
 import unittest2
 
-from opencenter.config import OpenCenterConfig
+from opencenter.config import OpenCenterConfiguration
 from opencenterclient.client import OpenCenterEndpoint
 
 
