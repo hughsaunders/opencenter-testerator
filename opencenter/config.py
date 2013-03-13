@@ -156,7 +156,8 @@ class OpenCenterConfiguration:
     def __init__(self):
         """Initialize a configuration from a conf directory and conf file."""
         # Environment variables override defaults...
-
+        
+        self.log = logging.getLogger(__name__)
         self.log.setLevel(getattr(logging, "INFO"))
                 
         conf_dir = os.environ.get('OPENCENTER_CONFIG_DIR',self.DEFAULT_CONFIG_DIR)
