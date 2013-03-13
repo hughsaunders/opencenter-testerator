@@ -30,7 +30,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         cluster_data =  config.cluster_data
         
         self.endpoint_url = opencenter_config.endpoint_url
-        self.server_name = opencenter_config.server_name
+        self.server_name = opencenter_config.instance_server_hostname
         self.chef_name = opencenter_config.instance_chef_hostname
         self.compute_name = opencenter_config.instance_compute_hostname
         self.controller_name = opencenter_config.instance_controller_hostname
