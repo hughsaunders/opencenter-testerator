@@ -131,11 +131,10 @@ class OpenCenterTestCase(unittest2.TestCase):
         
         controllers = []
         for controller_name in self.controller_name.split(","):
-            controller.append(self.ep.nodes.filter('name = "%s"' % controller_name).first())
+            controllers.append(self.ep.nodes.filter('name = "%s"' % controller_name).first())
         computes = []
         for compute_name in self.compute_name.split(","):
             computes.append(self.ep.nodes.filter('name = "%s"' % compute_name).first())
-            
             
         
         new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
