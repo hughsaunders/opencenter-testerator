@@ -50,7 +50,7 @@ class OpenCenterTestCase(unittest2.TestCase):
             'nova_vm_fixed_range': cluster_data.nova_vm_fixed_range
         }
         
-        if user:
+        if self.user:
             self.ep = OpenCenterEndpoint(self.endpoint_url, user=self.user, password=self.password)
         else:
             self.ep = OpenCenterEndpoint(self.endpoint_url)
