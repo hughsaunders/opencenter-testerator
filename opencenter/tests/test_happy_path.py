@@ -128,10 +128,21 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.assertIsNotNone(az_container)
         self.assertEquals(az_container.facts['parent_id'], compute_container.id)
         
-        # Install chef-client
+        
+        controllers = []
+        for controller_name in self.controller_name.split(","):
+            controller.append(self.ep.nodes.filter('name = "%s"' % controller_name).first())
+        computes = []
+        for compute_name in self.compute_name.split(","):
+            computes.append(self.ep.nodes.filter('name = "%s"' % compute_name).first())
+            
+            
+        
         new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
         new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
-        for srv in [new_controller, new_compute]:
+        
+        # Install chef-client
+        for srv in (controllers + computes):
             resp = self.ep.adventures[self.chef_cli.id].execute(
                 node=srv.id)
             self.assertEquals(resp.status_code, 202)
@@ -140,15 +151,19 @@ class OpenCenterTestCase(unittest2.TestCase):
             task.wait_for_complete()
         
 	    # Reparent self.controller_name under the new infra container
-        self._reparent(new_controller, infra_container)
-        new_controller._request('get')
-        self.assertEquals(new_controller.facts['parent_id'], infra_container.id)
+        for new_controller in controllers:
+            self._reparent(new_controller, infra_container)
+            new_controller._request('get')
+            self.assertEquals(new_controller.facts['parent_id'], infra_container.id)
+
 
 	    # Reparent self.controller_name under the new infra container
-        new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
-        self._reparent(new_compute, az_container)
-        new_compute._request('get')
-        self.assertEquals(new_compute.facts['parent_id'], az_container.id)
+        for new_compute in computes:
+            self._reparent(new_compute, az_container)
+            new_compute._request('get')
+            self.assertEquals(new_compute.facts['parent_id'], az_container.id)
+            
+
 
     def _reparent(self, child_node, parent_node):
         new_fact = self.ep.facts.create(node_id=child_node.id, key='parent_id', value=parent_node.id)
