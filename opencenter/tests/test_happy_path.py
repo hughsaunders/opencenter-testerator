@@ -25,7 +25,10 @@ class OpenCenterTestCase(unittest2.TestCase):
 
     def setUp(self):
         
-        config = OpenCenterConfig()
+        config = OpenCenterConfiguration()
+        opencenter_config = config.opencenter_config
+        cluster_data =  config.cluster_data
+        
         self.endpoint_url = opencenter_config.endpoint_url
         self.server_name = opencenter_config.server_name
         self.chef_name = opencenter_config.instance_chef_hostname
