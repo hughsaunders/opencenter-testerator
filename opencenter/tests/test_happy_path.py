@@ -50,7 +50,11 @@ class OpenCenterTestCase(unittest2.TestCase):
             'nova_vm_fixed_range': cluster_data.nova_vm_fixed_range
         }
         
-        self.ep = OpenCenterEndpoint(self.endpoint_url, user=self.user, password=self.password)
+        if user:
+            self.ep = OpenCenterEndpoint(self.endpoint_url, user=self.user, password=self.password)
+        else:
+            self.ep = OpenCenterEndpoint(self.endpoint_url)
+            
         self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin', user=self.user, password=self.password)
         self.workspace = self.ep.nodes.filter('name = "workspace"').first()
         self.unprovisioned = self.ep.nodes.filter("name = 'unprovisioned'").first()
