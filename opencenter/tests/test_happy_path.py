@@ -157,7 +157,7 @@ class OpenCenterTestCase(unittest2.TestCase):
             
             #Upload initial glance images
             resp = self.ep.adventures[self.upload_glance_images.id].execute(
-                        node=self.new_controller.id, plan_args=self.cluster_data)
+                        node=new_controller.id, plan_args=self.cluster_data)
             self.assertEquals(resp.status_code, 202)
             self.assertFalse(resp.requires_input)
             task = resp.task
