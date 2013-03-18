@@ -66,7 +66,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.n_api = self.ep.adventures.filter('name = "Install Nova Controller"').first()
         self.n_cpu = self.ep.adventures.filter('name = "Install Nova Compute"').first()
         self.download_cookbooks = self.ep.adventures.filter('name = "Download Chef Cookbooks"').first()
-       
+        self.upload_glance_images = self.ep.adventures.filter('name = "Upload Initial Glance Images"').first()
 
     def tearDown(self):
         pass
@@ -154,7 +154,16 @@ class OpenCenterTestCase(unittest2.TestCase):
             self._reparent(new_controller, infra_container)
             new_controller._request('get')
             self.assertEquals(new_controller.facts['parent_id'], infra_container.id)
-
+            
+            #Upload initial glance images
+            resp = self.ep.adventures[self.upload_glance_images.id].execute(
+                        node=self.new_controller.id, plan_args=self.cluster_data)
+            self.assertEquals(resp.status_code, 202)
+            self.assertFalse(resp.requires_input)
+            task = resp.task
+            task.wait_for_complete()
+            
+            
 
 	    # Reparent self.controller_name under the new infra container
         for new_compute in computes:
