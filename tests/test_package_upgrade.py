@@ -13,7 +13,7 @@ class AdventureTest(unittest2.TestCase):
     """
     Test the update agent adventure
     """
-    def setUpClass(self):
+    def setUp(self):
         self.endpoint_url = os.environ.get('OPENCENTER_ENDPOINT','http://127.0.0.0:8080')
         self.user = os.environ.get('OPENCENTER_USER',"admin")
         self.password = os.environ.get('OPENCENTER_PASSWORD',None)
@@ -24,9 +24,8 @@ class AdventureTest(unittest2.TestCase):
         self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin', user=self.user, password=self.password)
         self.workspace = self.ep.nodes.filter('name = "workspace"').first()
         
-        
 
-    def updateAdventure(self):
+    def test_update_adventure(self):
         update_agent_adventure = self.ep.adventures.filter('name = "Update Agent"').first()
         for node in self.ep.nodes:
             if 'agent' in node.facts['backends']:
