@@ -14,9 +14,9 @@ class AdventureTest(unittest2.TestCase):
     Test the update agent adventure
     """
     def setUp(self):
-                config = OpenCenterConfiguration()
+        config = OpenCenterConfiguration()
         opencenter_config = config.opencenter_config
-        cluster_data =  config.cluster_data
+        cluster_data = config.cluster_data
         
         self.endpoint_url = opencenter_config.endpoint_url
         self.user = opencenter_config.user
