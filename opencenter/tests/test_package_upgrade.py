@@ -38,5 +38,5 @@ class AdventureTest(unittest2.TestCase):
             if 'agent' in node.facts['backends']:
                 resp = self.ep.adventures[update_agent_adventure.id].execute(node=node.id)
                 self.assertEquals(resp.status_code, 202)
-                task = resp.task
-                task.wait_for_complete()
+                # task = resp.task
+                # task.wait_for_complete()
