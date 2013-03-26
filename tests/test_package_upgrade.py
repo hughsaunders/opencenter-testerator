@@ -6,19 +6,26 @@ import requests
 import time
 import unittest2
 
+from opencenter.config import OpenCenterConfiguration
 from opencenterclient.client import OpenCenterEndpoint
-
 
 class AdventureTest(unittest2.TestCase):
     """
     Test the update agent adventure
     """
     def setUp(self):
-        self.endpoint_url = os.environ.get('OPENCENTER_ENDPOINT','http://127.0.0.0:8080')
-        self.user = os.environ.get('OPENCENTER_USER',"admin")
-        self.password = os.environ.get('OPENCENTER_PASSWORD',None)
+                config = OpenCenterConfiguration()
+        opencenter_config = config.opencenter_config
+        cluster_data =  config.cluster_data
+        
+        self.endpoint_url = opencenter_config.endpoint_url
+        self.user = opencenter_config.user
+        self.password = opencenter_config.password
 
-        print "ENDPOINT_URL: %s" % self.endpoint_url
+        if self.user:
+            self.ep = OpenCenterEndpoint(self.endpoint_url, user=self.user, password=self.password)
+        else:
+            self.ep = OpenCenterEndpoint(self.endpoint_url)
 
         self.ep = OpenCenterEndpoint(self.endpoint_url, user=self.user, password=self.password)
         self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin', user=self.user, password=self.password)
