@@ -85,7 +85,7 @@ function run_pep8 {
 }
 
 
-NOSETESTS="nosetests $noseopts $noseargs tests/*.py"
+NOSETESTS="nosetests $noseopts $noseargs opencenter/tests/*.py"
 
 if [ $never_venv -eq 0 ]
 then
