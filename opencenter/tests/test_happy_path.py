@@ -8,6 +8,7 @@ import unittest2
 
 from opencenter.config import OpenCenterConfiguration
 from opencenterclient.client import OpenCenterEndpoint
+import re
 
 
 class OpenCenterTestCase(unittest2.TestCase):
@@ -27,7 +28,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         
         config = OpenCenterConfiguration()
         opencenter_config = config.opencenter_config
-        cluster_data =  config.cluster_data
+        cluster_data = config.cluster_data
         
         self.endpoint_url = opencenter_config.endpoint_url
         self.server_name = opencenter_config.instance_server_hostname
@@ -71,10 +72,16 @@ class OpenCenterTestCase(unittest2.TestCase):
     def tearDown(self):
         pass
 
+    def find_node(self, partial_name):
+        [n for n in self.ep.nodes if re.search(partial_name, n.name)].first()
+
+
     def test_opencenter_happy_path(self):
-        # Run the install-chef-server adventure on the node
-        chef_server = self.ep.nodes.filter("name = '%s'" % self.chef_name).first()
-        resp = self.ep.adventures[self.chef_svr.id].execute(node=chef_server.id)
+
+        chef_node = self.find_node(self.chef_name)
+        # Run the install-chef-server adventure on the chef node
+        resp = self.ep.adventures[self.chef_svr.id].execute(
+            node=chef_node.id)
         self.assertEquals(resp.status_code, 202)
 
         # adventure is running, go poll
@@ -83,17 +90,17 @@ class OpenCenterTestCase(unittest2.TestCase):
         # self._poll_till_task_done(server, wait_time=900)
 
         # refresh the server object
-        chef_server._request('get')
-        self._validate_chef_server(chef_server)
+        chef_node._request('get')
+        self._validate_chef_server(chef_node)
 
         # run the 'download chef cookbooks' adventure
-        resp = self.ep.adventures[self.download_cookbooks.id].execute(node=chef_server.id)
-        self.assertEquals(resp.status_code, 202)
-        task = resp.task
-        task.wait_for_complete()
+        # resp = self.ep.adventures[self.download_cookbooks.id].execute(
+        #     node=chef_node.id)
+        # self.assertEquals(resp.status_code, 202)
+        # task = resp.task
+        # task.wait_for_complete()
         # TODO(shep): probably need to assert against facts/attrs here
 
-        
         # Lets check if the root workspace now has the correct adventure
         self.assertTrue(self.nova_clus.id in self.workspace.adventures.keys())
         
@@ -127,18 +134,16 @@ class OpenCenterTestCase(unittest2.TestCase):
         az_container = self.ep.nodes.filter('name = "AZ nova"').first()
         self.assertIsNotNone(az_container)
         self.assertEquals(az_container.facts['parent_id'], compute_container.id)
-        
-        
+
         controllers = []
         for controller_name in self.controller_name.split(","):
-            controllers.append(self.ep.nodes.filter('name = "%s"' % controller_name).first())
+            controllers.append(self.find_node(controller_name))
         computes = []
         for compute_name in self.compute_name.split(","):
-            computes.append(self.ep.nodes.filter('name = "%s"' % compute_name).first())
-            
-        
-        new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
-        new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
+            computes.append(self.find_node(compute_name))
+
+        # new_controller = self.find_nodes(controller_name)
+        # new_compute = self.find_node(self.compute_name)
         
         # Install chef-client
         for srv in (controllers + computes):
