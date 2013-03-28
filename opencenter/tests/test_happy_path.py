@@ -73,7 +73,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         pass
 
     def find_node(self, partial_name):
-        [n for n in self.ep.nodes if re.search(partial_name, n.name)].first()
+        return [n for n in self.ep.nodes if re.search(partial_name, n.name)][0]
 
 
     def test_opencenter_happy_path(self):
