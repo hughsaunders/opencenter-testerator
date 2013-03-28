@@ -82,7 +82,7 @@ class HAConfig(BaseConfig):
         return self.get("nova_mysql_vip", "10.0.0.2")
 
     @property
-    def nova_api_vip(self):
+    def nova_rabbitmq_vip(self):
         return self.get("nova_rabbitmq_vip", "10.0.0.3")
 
     
