@@ -81,7 +81,7 @@ class OpenCenterTestCase(unittest2.TestCase):
             raise ValueError('No nodes found for pattern %s' % partial_name )
 
 
-    def test_opencenter_happy_path(self):
+    def test_install_chef_server(self):
 
         chef_node = self.find_node(self.chef_name)
         # Run the install-chef-server adventure on the chef node
@@ -98,6 +98,8 @@ class OpenCenterTestCase(unittest2.TestCase):
         chef_node._request('get')
         self._validate_chef_server(chef_node)
 
+
+
         # run the 'download chef cookbooks' adventure
         # resp = self.ep.adventures[self.download_cookbooks.id].execute(
         #     node=chef_node.id)
@@ -106,6 +108,8 @@ class OpenCenterTestCase(unittest2.TestCase):
         # task.wait_for_complete()
         # TODO(shep): probably need to assert against facts/attrs here
 
+
+    def test_create_nova_cluster(self):
         # Lets check if the root workspace now has the correct adventure
         self.assertTrue(self.nova_clus.id in self.workspace.adventures.keys())
         
@@ -140,6 +144,8 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.assertIsNotNone(az_container)
         self.assertEquals(az_container.facts['parent_id'], compute_container.id)
 
+    def test_move_controllers(self):
+
         controllers = []
         for controller_name in self.controller_name.split(","):
             controllers.append(self.find_node(controller_name))
@@ -172,10 +178,8 @@ class OpenCenterTestCase(unittest2.TestCase):
             self.assertFalse(resp.requires_input)
             task = resp.task
             task.wait_for_complete()
-            
-            
 
-	    # Reparent self.controller_name under the new infra container
+    def test_move_compute(self):
         for new_compute in computes:
             self._reparent(new_compute, az_container)
             new_compute._request('get')
