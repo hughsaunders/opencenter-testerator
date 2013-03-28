@@ -195,6 +195,10 @@ class OpenCenterTestCase(unittest2.TestCase):
             self.assertEquals(new_compute.facts['parent_id'], az_container.id)
 
     def _reparent(self, child_node, parent_node):
+        #Check if reparenting is necessary
+        if child_node.facts['parent_id'] == parent_node.id:
+            return
+
         new_fact = self.ep.facts.create(
             node_id=child_node.id, key='parent_id', value=parent_node.id)
         resp = new_fact.save()
