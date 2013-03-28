@@ -73,7 +73,12 @@ class OpenCenterTestCase(unittest2.TestCase):
         pass
 
     def find_node(self, partial_name):
-        return [n for n in self.ep.nodes if re.search(partial_name, n.name)][0]
+        matches = [n for n in self.ep.nodes if
+                   re.search(partial_name, n.name)]
+        if matches:
+            return matches[0]
+        else:
+            raise ValueError('No nodes found for pattern %s' % partial_name )
 
 
     def test_opencenter_happy_path(self):
