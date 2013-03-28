@@ -74,11 +74,11 @@ class OpenCenterTestCase(unittest2.TestCase):
 
     def find_node(self, partial_name):
         matches = [n for n in self.ep.nodes if
-                   re.search(partial_name, n.name)]
+                   re.search(partial_name.strip(), n.name)]
         if matches:
             return matches[0]
         else:
-            raise ValueError('No nodes found for pattern %s' % partial_name )
+            raise ValueError('No nodes found for pattern %s' % partial_name)
 
 
     def test_install_chef_server(self):
