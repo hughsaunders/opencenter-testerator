@@ -28,6 +28,8 @@ class BaseConfig(object):
         self.conf = conf
 
     def get(self, item_name, default_value=None):
+        if item_name in os.environ:
+            return os.environ[item_name]
         try:
             return self.conf.get(self.SECTION_NAME, item_name, raw=True)
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
@@ -67,13 +69,22 @@ class OpenCenterConfig(BaseConfig):
     def password(self):
         return self.get("password", None)
     
-    
-   
-        
-    
-    
-    
-    
+
+class HAConfig(BaseConfig):
+    SECTION_NAME = "ha_data"
+
+    @property
+    def nova_api_vip(self):
+        return self.get("nova_api_vip", "10.0.0.1")
+
+    @property
+    def nova_mysql_vip(self):
+        return self.get("nova_mysql_vip", "10.0.0.2")
+
+    @property
+    def nova_api_vip(self):
+        return self.get("nova_rabbitmq_vip", "10.0.0.3")
+
     
 class ClusterDataConfig(BaseConfig):
     SECTION_NAME = "cluster_data"
@@ -176,6 +187,7 @@ class OpenCenterConfiguration:
 
         self.opencenter_config = OpenCenterConfig(self.conf)
         self.cluster_data = ClusterDataConfig(self.conf)
+        self.ha_config = HAConfig(self.conf)
         
 
     def load_config(self, path):

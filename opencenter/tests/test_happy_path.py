@@ -29,6 +29,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         config = OpenCenterConfiguration()
         opencenter_config = config.opencenter_config
         cluster_data = config.cluster_data
+        ha_config = config.ha_config
 
         self.endpoint_url = opencenter_config.endpoint_url
         self.server_name = opencenter_config.instance_server_hostname
@@ -50,6 +51,12 @@ class OpenCenterTestCase(unittest2.TestCase):
             'nova_vm_fixed_if': cluster_data.nova_vm_fixed_if,
             'nova_vm_fixed_range': cluster_data.nova_vm_fixed_range,
             'libvirt_type': cluster_data.libvirt_type
+        }
+
+        self.ha_config = {
+            'nova_api_vip': ha_config.nova_api_vip,
+            'nova_mysql_vip': ha_config.nova_mysql_vip,
+            'nova_rabbitmq_vip': ha_config.rabbitmq_vip
         }
 
         if self.user:
@@ -81,6 +88,8 @@ class OpenCenterTestCase(unittest2.TestCase):
             'name = "Download Chef Cookbooks"').first()
         self.upload_glance_images = self.ep.adventures.filter(
             'name = "Upload Initial Glance Images"').first()
+        self.enable_ha = self.ep.adventures.filter(
+            'name ="Enable HA Infrastructure"').first()
 
     def tearDown(self):
         pass
@@ -175,7 +184,18 @@ class OpenCenterTestCase(unittest2.TestCase):
             task.wait_for_complete()
 
             # Reparent self.controller_name under the new infra container
-        for new_controller in controllers:
+
+        for i in len(controllers):
+            new_controller = controllers[i]
+            if i == 1:
+                # Once the first node has been added to the infra container,
+                # and before the second, run the enable ha adventure
+                resp = self.ep.adventures[self.enable_ha.id].execute(
+                    node=infra_container.id, plan_args=self.ha_config)
+                self.assertEquals(resp.status_code, 202)
+                self.assertFalse(resp.requires_input)
+                task = resp.task
+                task.wait_for_complete()
             self._reparent(new_controller, infra_container)
             new_controller._request('get')
             self.assertEquals(new_controller.facts[
