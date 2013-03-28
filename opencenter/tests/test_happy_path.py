@@ -56,7 +56,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.ha_config = {
             'nova_api_vip': ha_config.nova_api_vip,
             'nova_mysql_vip': ha_config.nova_mysql_vip,
-            'nova_rabbitmq_vip': ha_config.rabbitmq_vip
+            'nova_rabbitmq_vip': ha_config.nova_rabbitmq_vip
         }
 
         if self.user:
