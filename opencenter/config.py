@@ -125,7 +125,7 @@ class ClusterDataConfig(BaseConfig):
 
 
     
-class VipConfig(BaseConfig):
+class VipDataConfig(BaseConfig):
     SECTION_NAME = "vip_data"
 
     @property
