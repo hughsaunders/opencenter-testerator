@@ -49,9 +49,9 @@ class OpenCenterTestCase(unittest2.TestCase):
             'libvirt_type': cluster_data.libvirt_type
         }
         self.vip_data = {
-            'nova_rabbitmq_vip': cluster_data.nova_rabbitmq_vip,
-            'nova_api_vip': cluster_data.nova_api_vip,
-            'nova_mysql_vip': cluster_data.nova_mysql_vip
+            'nova_rabbitmq_vip': vip_data.nova_rabbitmq_vip,
+            'nova_api_vip': vip_data.nova_api_vip,
+            'nova_mysql_vip': vip_data.nova_mysql_vip
         }
         
         # Establish connections with endpoints
