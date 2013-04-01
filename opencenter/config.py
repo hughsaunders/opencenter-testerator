@@ -129,7 +129,7 @@ class VipConfig(BaseConfig):
     SECTION_NAME = "vip_data"
 
     @property
-    def nova_api_vip(self):o
+    def nova_api_vip(self):
         return self.get("nova_api_vip")
 
     @property
