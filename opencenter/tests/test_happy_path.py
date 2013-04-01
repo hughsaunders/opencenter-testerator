@@ -68,6 +68,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.n_cpu = self.ep.adventures.filter('name = "Install Nova Compute"').first()
         self.download_cookbooks = self.ep.adventures.filter('name = "Download Chef Cookbooks"').first()
         self.upload_glance_images = self.ep.adventures.filter('name = "Upload Initial Glance Images"').first()
+        self.enable_ha = self.ep.adventures.filter('name = "Enable HA Infrastructure"').first()
 
     def tearDown(self):
         pass
@@ -125,6 +126,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
         
         # Reparent self.controller_name under the new infra container
+        ha_enabled = false
         for new_controller in controllers:
             self._reparent(new_controller, infra_container)
             new_controller._request('get')
@@ -137,6 +139,13 @@ class OpenCenterTestCase(unittest2.TestCase):
             self.assertFalse(resp.requires_input)
             task = resp.task
             task.wait_for_complete()
+
+            # Enable HA if we can
+            if not ha_enabled and len(controllers) > 1:
+                resp = self.ep.adventures[self.enable_ha.id].execute(
+                        node=new_controller.id, plan_args=self.cluster_vips)
+                self.assertEquals(resp.status_code, 202)
+                ha_enabled = True
             
         # Reparent self.controller_name under the new infra container
         for new_compute in computes:

@@ -125,14 +125,20 @@ class ClusterDataConfig(BaseConfig):
 
 
     
-    
-    
-    
-    
-    
-    
-    
-    
+class VipConfig(BaseConfig):
+    SECTION_NAME = "vip_data"
+
+    @property
+    def nova_api_vip(self):o
+        return self.get("nova_api_vip")
+
+    @property
+    def mysql_vip(self):
+        return self.get("mysql_vip")    
+
+    @property
+    def rabbit_vip(self):
+        return self.get("rabbit_vip")    
     
 
 def singleton(cls):
