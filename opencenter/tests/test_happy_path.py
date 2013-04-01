@@ -48,6 +48,11 @@ class OpenCenterTestCase(unittest2.TestCase):
             'nova_vm_fixed_range': cluster_data.nova_vm_fixed_range,
             'libvirt_type': cluster_data.libvirt_type
         }
+        self.vip_data = {
+            'nova_rabbitmq_vip': cluster_data.nova_rabbitmq_vip,
+            'nova_api_vip': cluster_data.nova_api_vip,
+            'nova_mysql_vip': cluster_data.nova_mysql_vip
+        }
         
         # Establish connections with endpoints
         if self.user:
@@ -143,7 +148,7 @@ class OpenCenterTestCase(unittest2.TestCase):
             # Enable HA if we can
             if not ha_enabled and len(controllers) > 1:
                 resp = self.ep.adventures[self.enable_ha.id].execute(
-                        node=new_controller.id, plan_args=self.cluster_vips)
+                    node=new_controller.id, plan_args=self.vip_data)
                 self.assertEquals(resp.status_code, 202)
                 ha_enabled = True
             
