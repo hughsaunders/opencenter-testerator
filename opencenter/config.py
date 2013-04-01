@@ -137,8 +137,8 @@ class VipDataConfig(BaseConfig):
         return self.get("nova_mysql_vip")    
 
     @property
-    def nova_rabbit_vip(self):
-        return self.get("nova_rabbit_vip")    
+    def nova_rabbitmq_vip(self):
+        return self.get("nova_rabbitmq_vip")    
     
 
 def singleton(cls):
