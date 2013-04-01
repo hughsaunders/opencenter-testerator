@@ -182,6 +182,7 @@ class OpenCenterConfiguration:
 
         self.opencenter_config = OpenCenterConfig(self.conf)
         self.cluster_data = ClusterDataConfig(self.conf)
+        self.vip_data = VipDataConfig(self.conf)
         
 
     def load_config(self, path):
