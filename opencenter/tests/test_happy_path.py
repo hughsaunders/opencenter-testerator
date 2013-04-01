@@ -24,11 +24,10 @@ class OpenCenterTestCase(unittest2.TestCase):
         pass
 
     def setUp(self):
-        
+        # Gather configuration data
         config = OpenCenterConfiguration()
         opencenter_config = config.opencenter_config
         cluster_data =  config.cluster_data
-        
         self.endpoint_url = opencenter_config.endpoint_url
         self.server_name = opencenter_config.instance_server_hostname
         self.chef_name = opencenter_config.instance_chef_hostname
@@ -36,7 +35,6 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.controller_name = opencenter_config.instance_controller_hostname
         self.user = opencenter_config.user
         self.password = opencenter_config.password
-             
         self.cluster_data = {
             'osops_public': cluster_data.osops_public,
             'osops_mgmt': cluster_data.osops_mgmt,
@@ -51,14 +49,17 @@ class OpenCenterTestCase(unittest2.TestCase):
             'libvirt_type': cluster_data.libvirt_type
         }
         
+        # Establish connections with endpoints
         if self.user:
             self.ep = OpenCenterEndpoint(self.endpoint_url, user=self.user, password=self.password)
         else:
             self.ep = OpenCenterEndpoint(self.endpoint_url)
-            
         self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin', user=self.user, password=self.password)
+
+        # Collect all the nodes we need
         self.workspace = self.ep.nodes.filter('name = "workspace"').first()
         self.unprovisioned = self.ep.nodes.filter("name = 'unprovisioned'").first()
+
         # Collect all the adventures we are going to run
         self.chef_svr = self.ep.adventures.filter('name = "Install Chef Server"').first()
         self.chef_cli = self.ep.adventures.filter('name = "Install Chef Client"').first()
@@ -80,38 +81,21 @@ class OpenCenterTestCase(unittest2.TestCase):
         # adventure is running, go poll
         task = resp.task
         task.wait_for_complete()
-        # self._poll_till_task_done(server, wait_time=900)
 
         # refresh the server object
         chef_server._request('get')
         self._validate_chef_server(chef_server)
 
-        # run the 'download chef cookbooks' adventure
-        resp = self.ep.adventures[self.download_cookbooks.id].execute(node=chef_server.id)
-        self.assertEquals(resp.status_code, 202)
-        task = resp.task
-        task.wait_for_complete()
-        # TODO(shep): probably need to assert against facts/attrs here
-
-        
         # Lets check if the root workspace now has the correct adventure
         self.assertTrue(self.nova_clus.id in self.workspace.adventures.keys())
         
-        # Trying new and improved adventure.execute()
-        # new_plan = self._update_plan(plan.execution_plan.raw_plan)
+        # Create an OpenStack cluster
         resp = self.ep.adventures[self.nova_clus.id].execute(
             node=self.workspace.id, plan_args=self.cluster_data)
         self.assertEquals(resp.status_code, 202)
         self.assertFalse(resp.requires_input)
         task = resp.task
         task.wait_for_complete()
-
-        # # Lets post back the new plan
-        # resp = self._post_new_plan(plan.execution_plan.raw_plan, self.workspace)
-        # self.assertEquals(resp.status_code, 202)
-    	# task = resp.task
-    	# task.wait_for_complete()
-        # # self._poll_till_task_done(self.workspace, wait_time=6)
 
         # make sure test_cluster got created
         test_cluster = self.ep.nodes.filter(
@@ -140,16 +124,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
         new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
         
-        # Install chef-client
-        for srv in (controllers + computes):
-            resp = self.ep.adventures[self.chef_cli.id].execute(
-                node=srv.id)
-            self.assertEquals(resp.status_code, 202)
-            self.assertFalse(resp.requires_input)
-            task = resp.task
-            task.wait_for_complete()
-        
-	    # Reparent self.controller_name under the new infra container
+        # Reparent self.controller_name under the new infra container
         for new_controller in controllers:
             self._reparent(new_controller, infra_container)
             new_controller._request('get')
@@ -163,15 +138,11 @@ class OpenCenterTestCase(unittest2.TestCase):
             task = resp.task
             task.wait_for_complete()
             
-            
-
-	    # Reparent self.controller_name under the new infra container
+        # Reparent self.controller_name under the new infra container
         for new_compute in computes:
             self._reparent(new_compute, az_container)
             new_compute._request('get')
             self.assertEquals(new_compute.facts['parent_id'], az_container.id)
-            
-
 
     def _reparent(self, child_node, parent_node):
         new_fact = self.ep.facts.create(node_id=child_node.id, key='parent_id', value=parent_node.id)
