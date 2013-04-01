@@ -126,7 +126,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
         
         # Reparent self.controller_name under the new infra container
-        ha_enabled = false
+        ha_enabled = False
         for new_controller in controllers:
             self._reparent(new_controller, infra_container)
             new_controller._request('get')
