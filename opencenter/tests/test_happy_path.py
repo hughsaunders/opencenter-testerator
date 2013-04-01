@@ -28,6 +28,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         config = OpenCenterConfiguration()
         opencenter_config = config.opencenter_config
         cluster_data =  config.cluster_data
+        vip_data = config.vip_data
         self.endpoint_url = opencenter_config.endpoint_url
         self.server_name = opencenter_config.instance_server_hostname
         self.chef_name = opencenter_config.instance_chef_hostname
