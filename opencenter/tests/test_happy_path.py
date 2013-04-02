@@ -158,6 +158,7 @@ class OpenCenterTestCase(unittest2.TestCase):
                 self.assertFalse(resp.requires_input)
                 task = resp.task
                 task.wait_for_complete()
+                infra_container._request('get')
                 self.assertTrue(infra_container.facts['ha_infra'])
                 ha_enabled = True
             
