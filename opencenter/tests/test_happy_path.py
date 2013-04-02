@@ -125,7 +125,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         task.wait_for_complete()
 
         #wait for any other tasks to complete
-        self. wait_for_all_tasks()
+        self.wait_for_all_tasks()
 
         # make sure test_cluster got created
         test_cluster = self.find_node(self.cluster_data['cluster_name'])
