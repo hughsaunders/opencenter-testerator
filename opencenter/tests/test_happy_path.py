@@ -149,8 +149,11 @@ class OpenCenterTestCase(unittest2.TestCase):
             # Enable HA if we can
             if not ha_enabled and len(controllers) > 1:
                 resp = self.ep.adventures[self.enable_ha.id].execute(
-                    node=new_controller.id, plan_args=self.vip_data)
+                    node=infra_container.id, plan_args=self.vip_data)
                 self.assertEquals(resp.status_code, 202)
+                self.assertFalse(resp.requires_input)
+                task = resp.task
+                task.wait_for_complete()
                 ha_enabled = True
             
         # Reparent self.controller_name under the new infra container
