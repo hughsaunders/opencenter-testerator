@@ -8,7 +8,7 @@ import unittest2
 
 from opencenter.config import OpenCenterConfiguration
 from opencenterclient.client import OpenCenterEndpoint
-
+import re
 
 class OpenCenterTestCase(unittest2.TestCase):
     """
@@ -63,8 +63,8 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.admin_ep = OpenCenterEndpoint(self.endpoint_url + '/admin', user=self.user, password=self.password)
 
         # Collect all the nodes we need
-        self.workspace = self.ep.nodes.filter('name = "workspace"').first()
-        self.unprovisioned = self.ep.nodes.filter("name = 'unprovisioned'").first()
+        self.workspace = self.find_node("workspace")
+        self.unprovisioned = self.find_node('unprovisioned')
 
         # Collect all the adventures we are going to run
         self.chef_svr = self.ep.adventures.filter('name = "Install Chef Server"').first()
@@ -79,13 +79,23 @@ class OpenCenterTestCase(unittest2.TestCase):
     def tearDown(self):
         pass
 
+    def find_node(self, partial_name):
+        """find a node by partial name match.
+        Useful for unpredictable jenkins node names."""
+        matches = [n for n in self.ep.nodes if
+                   re.search(partial_name.strip(), n.name)]
+        if matches:
+            return matches[0]
+        else:
+            raise ValueError('No nodes found for pattern %s' % partial_name)
+
     def test_opencenter_happy_path(self):
         """Happy path creates a chef server and lays down an openstack 
         cluster. If there's enough controllers in the configuration a
         second controller is created for HA"""
         
         # Run the install-chef-server adventure on the node
-        chef_server = self.ep.nodes.filter("name = '%s'" % self.chef_name).first()
+        chef_server = self.find_node(self.chef_name)
         resp = self.ep.adventures[self.chef_svr.id].execute(node=chef_server.id)
         self.assertEquals(resp.status_code, 202)
 
@@ -109,31 +119,26 @@ class OpenCenterTestCase(unittest2.TestCase):
         task.wait_for_complete()
 
         # make sure test_cluster got created
-        test_cluster = self.ep.nodes.filter(
-            'name = "%s"' % self.cluster_data['cluster_name']).first()
+        test_cluster = self.find_node(self.cluster_data['cluster_name'])
         self.assertIsNotNone(test_cluster)
         self.assertEquals(test_cluster.facts['parent_id'], self.workspace.id)
-        infra_container = self.ep.nodes.filter('name = "Infrastructure"').first()
+        infra_container = self.find_node("Infrastructure")
         self.assertIsNotNone(infra_container)
         self.assertEquals(infra_container.facts['parent_id'], test_cluster.id)
-        compute_container = self.ep.nodes.filter('name = "Compute"').first()
+        compute_container = self.find_node("Compute")
         self.assertIsNotNone(compute_container)
         self.assertEquals(compute_container.facts['parent_id'], test_cluster.id)
-        az_container = self.ep.nodes.filter('name = "AZ nova"').first()
+        az_container = self.find_node("AZ nova")
         self.assertIsNotNone(az_container)
         self.assertEquals(az_container.facts['parent_id'], compute_container.id)
         
         
         controllers = []
         for controller_name in self.controller_name.split(","):
-            controllers.append(self.ep.nodes.filter('name = "%s"' % controller_name).first())
+            controllers.append(self.find_node(controller_name))
         computes = []
         for compute_name in self.compute_name.split(","):
-            computes.append(self.ep.nodes.filter('name = "%s"' % compute_name).first())
-            
-        
-        new_controller = self.ep.nodes.filter('name = "%s"' % self.controller_name).first()
-        new_compute = self.ep.nodes.filter('name = "%s"' % self.compute_name).first()
+            computes.append(self.find_node(compute_name))
         
         # Reparent self.controller_name under the new infra container
         ha_enabled = False
