@@ -80,6 +80,10 @@ class OpenCenterTestCase(unittest2.TestCase):
         pass
 
     def test_opencenter_happy_path(self):
+        """Happy path creates a chef server and lays down an openstack 
+        cluster. If there's enough controllers in the configuration a
+        second controller is created for HA"""
+        
         # Run the install-chef-server adventure on the node
         chef_server = self.ep.nodes.filter("name = '%s'" % self.chef_name).first()
         resp = self.ep.adventures[self.chef_svr.id].execute(node=chef_server.id)
@@ -146,7 +150,7 @@ class OpenCenterTestCase(unittest2.TestCase):
             task = resp.task
             task.wait_for_complete()
 
-            # Enable HA if we can
+            # Enable HA if possible
             if not ha_enabled and len(controllers) > 1:
                 resp = self.ep.adventures[self.enable_ha.id].execute(
                     node=infra_container.id, plan_args=self.vip_data)
@@ -154,6 +158,7 @@ class OpenCenterTestCase(unittest2.TestCase):
                 self.assertFalse(resp.requires_input)
                 task = resp.task
                 task.wait_for_complete()
+                self.assertTrue(infra_container.facts['ha_infra'])
                 ha_enabled = True
             
         # Reparent self.controller_name under the new infra container
