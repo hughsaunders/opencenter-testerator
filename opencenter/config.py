@@ -28,6 +28,8 @@ class BaseConfig(object):
         self.conf = conf
 
     def get(self, item_name, default_value=None):
+        if item_name in os.environ:
+            return os.environ[item_name]
         try:
             return self.conf.get(self.SECTION_NAME, item_name, raw=True)
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
