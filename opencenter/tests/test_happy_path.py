@@ -127,6 +127,9 @@ class OpenCenterTestCase(unittest2.TestCase):
         #wait for any other tasks to complete
         self.wait_for_all_tasks()
 
+        for node in self.ep.nodes:
+            print node.name, node.id
+
         # make sure test_cluster got created
         test_cluster = self.find_node(self.cluster_data['cluster_name'])
         self.assertIsNotNone(test_cluster)
