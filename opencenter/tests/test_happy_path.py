@@ -130,6 +130,9 @@ class OpenCenterTestCase(unittest2.TestCase):
         for node in self.ep.nodes:
             print node.name, node.id
 
+        for task in self.ep.tasks:
+            print task.action, task.id, task.s
+
         # make sure test_cluster got created
         test_cluster = self.find_node(self.cluster_data['cluster_name'])
         self.assertIsNotNone(test_cluster)
