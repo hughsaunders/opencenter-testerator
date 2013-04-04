@@ -131,7 +131,7 @@ class OpenCenterTestCase(unittest2.TestCase):
             print node.name, node.id
 
         for task in self.ep.tasks:
-            print task.action, task.id, task.s
+            print task.action, task.id, task.state
 
         # make sure test_cluster got created
         test_cluster = self.find_node(self.cluster_data['cluster_name'])
