@@ -2,7 +2,7 @@
 
 function usage {
   echo "Usage: $0 [OPTION]..."
-  echo "Run the Roush functional test suite(s)"
+  echo "Run the opencenter functional test suite(s)"
   echo ""
   echo "  -V, --virtual-env        Always use virtualenv.  Install automatically if not present"
   echo "  -N, --no-virtual-env     Don't use virtualenv.  Run tests in local environment"
@@ -54,7 +54,7 @@ done
 
 # If enabled, tell nose to collect coverage data
 if [ $coverage -eq 1 ]; then
-    # noseopts="$noseopts --with-xunit --with-coverage --cover-package=roush"
+    # noseopts="$noseopts --with-xunit --with-coverage --cover-package=opencenter"
     noseopts="$noseopts --with-xunit"
 fi
 
@@ -85,7 +85,7 @@ function run_pep8 {
 }
 
 
-NOSETESTS="nosetests $noseopts $noseargs tests/*.py"
+NOSETESTS="nosetests $noseopts $noseargs opencenter/tests/*.py"
 
 if [ $never_venv -eq 0 ]
 then
@@ -129,6 +129,6 @@ run_tests
 if [ $coverage -eq 1 ]; then
     echo "Generating coverage report in coverage/"
     # Don't compute coverage for common code, which is tested elsewhere
-    [ $html -eq 1 ] && ${wrapper} coverage html --include='roush/*' -d coverage -i
-    ${wrapper} coverage xml --include='roush/*' -i
+    [ $html -eq 1 ] && ${wrapper} coverage html --include='opencenter/*' -d coverage -i
+    ${wrapper} coverage xml --include='opencenter/*' -i
 fi
