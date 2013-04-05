@@ -90,6 +90,7 @@ class OpenCenterTestCase(unittest2.TestCase):
             raise ValueError('No nodes found for pattern %s' % partial_name)
 
     def wait_for_all_tasks(self):
+        self.ep.tasks._refresh()
         while not all([t.complete for t in self.ep.tasks]):
             time.sleep(1)
 
