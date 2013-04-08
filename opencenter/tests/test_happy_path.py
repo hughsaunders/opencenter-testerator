@@ -142,7 +142,7 @@ class OpenCenterTestCase(unittest2.TestCase):
                 break
             except ValueError, e:
                 print e, "sleeping for 3"
-                time.sleep(3)
+                time.sleep(60)
 
         # make sure test_cluster got created
         test_cluster = self.find_node(self.cluster_data['cluster_name'])
