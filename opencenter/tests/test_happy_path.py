@@ -5,6 +5,7 @@ import os
 import requests
 import time
 import unittest2
+import datetime
 
 from opencenter.config import OpenCenterConfiguration
 from opencenterclient.client import OpenCenterEndpoint
@@ -141,7 +142,8 @@ class OpenCenterTestCase(unittest2.TestCase):
                     self.cluster_data['cluster_name'])
                 break
             except ValueError, e:
-                print e, "sleeping for 3"
+                print e, "sleeping for 60", datetime.datetime.now()\
+                    .isoformat()
                 time.sleep(60)
 
         # make sure test_cluster got created
