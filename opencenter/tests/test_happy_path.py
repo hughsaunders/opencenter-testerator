@@ -101,7 +101,8 @@ class OpenCenterTestCase(unittest2.TestCase):
         
         # Run the install-chef-server adventure on the node
         chef_server = self.find_node(self.chef_name)
-        resp = self.ep.adventures[self.chef_svr.id].execute(node=chef_server.id)
+        resp = self.ep.adventures[self.chef_svr.id].execute(
+            node=chef_server.id)
         self.assertEquals(resp.status_code, 202)
 
         # adventure is running, go poll
@@ -133,6 +134,14 @@ class OpenCenterTestCase(unittest2.TestCase):
 
         for task in self.ep.tasks:
             print task.action, task.id, task.state
+
+        for i in range(10):
+            try:
+                test_cluster = self.find_node(
+                    self.cluster_data['cluster_name'])
+                break
+            except ValueError:
+                time.sleep(3)
 
         # make sure test_cluster got created
         test_cluster = self.find_node(self.cluster_data['cluster_name'])
