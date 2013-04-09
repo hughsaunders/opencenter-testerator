@@ -83,6 +83,7 @@ class OpenCenterTestCase(unittest2.TestCase):
     def find_node(self, partial_name):
         """find a node by partial name match.
         Useful for unpredictable jenkins node names."""
+        self.ep._refresh('nodes', 'before_find_node')
         matches = [n for n in self.ep.nodes if
                    re.search(partial_name.strip(), n.name)]
         if matches:
