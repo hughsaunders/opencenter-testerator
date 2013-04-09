@@ -91,11 +91,6 @@ class OpenCenterTestCase(unittest2.TestCase):
         else:
             raise ValueError('No nodes found for pattern %s' % partial_name)
 
-    def wait_for_all_tasks(self):
-        self.ep.tasks._refresh()
-        while not all([t.complete for t in self.ep.tasks]):
-            time.sleep(1)
-
     def test_opencenter_happy_path(self):
         """Happy path creates a chef server and lays down an openstack 
         cluster. If there's enough controllers in the configuration a
@@ -124,28 +119,7 @@ class OpenCenterTestCase(unittest2.TestCase):
         self.assertEquals(resp.status_code, 202)
         self.assertFalse(resp.requires_input)
         task = resp.task
-
-        #only waits for adventurate tasks
         task.wait_for_complete()
-
-        #wait for any other tasks to complete
-        self.wait_for_all_tasks()
-
-        for node in self.ep.nodes:
-            print node.name, node.id
-
-        for task in self.ep.tasks:
-            print task.action, task.id, task.state
-
-        for i in range(10):
-            try:
-                test_cluster = self.find_node(
-                    self.cluster_data['cluster_name'])
-                break
-            except ValueError, e:
-                print e, "sleeping for 60", datetime.datetime.now()\
-                    .isoformat()
-                time.sleep(60)
 
         # make sure test_cluster got created
         test_cluster = self.find_node(self.cluster_data['cluster_name'])
@@ -168,6 +142,9 @@ class OpenCenterTestCase(unittest2.TestCase):
         computes = []
         for compute_name in self.compute_name.split(","):
             computes.append(self.find_node(compute_name))
+
+        print "computes", computes
+        print "controllers", controllers
         
         # Reparent self.controller_name under the new infra container
         ha_enabled = False
